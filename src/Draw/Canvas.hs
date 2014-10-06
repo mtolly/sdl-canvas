@@ -1,4 +1,14 @@
-module Draw.Canvas where
+module Draw.Canvas
+( initialize
+, Canvas()
+, newCanvas
+, deleteCanvas
+, finish
+, Context()
+, getContext
+, clear
+, drawRect
+) where
 
 import Draw.Util
 

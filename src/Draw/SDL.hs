@@ -1,4 +1,14 @@
-module Draw.SDL where
+module Draw.SDL
+( initialize
+, Canvas()
+, newCanvas
+, deleteCanvas
+, finish
+, Context()
+, getContext
+, clear
+, drawRect
+) where
 
 import Draw.Util
 
