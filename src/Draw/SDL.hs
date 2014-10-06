@@ -17,7 +17,7 @@ import qualified Graphics.UI.SDL as SDL
 import Data.Bits
 import Foreign
 import Foreign.C
-
+import Control.Monad (forM_)
 import Control.Concurrent (threadDelay)
 
 initialize :: IO ()
@@ -68,7 +68,9 @@ drawRect (x, y) (w, h) (r, g, b, a) rend = do
 
 drawCircle :: Posn -> Int -> RGBA -> Context -> IO ()
 drawCircle (x, y) rad (r, g, b, a) rend = do
-  0 <- c_filledCircleRGBA rend (fi x) (fi y) (fi rad) (fi r) (fi g) (fi b) (fi a)
+  forM_ [c_filledCircleRGBA, c_aacircleRGBA] $ \f -> do
+    0 <- f rend (fi x) (fi y) (fi rad) (fi r) (fi g) (fi b) (fi a)
+    return ()
   SDL.renderPresent rend
 
 -- SDL utils
@@ -96,6 +98,14 @@ pollEvent = alloca $ \pevt -> do
 foreign import ccall unsafe
   "filledCircleRGBA"
   c_filledCircleRGBA
+  :: SDL.Renderer
+  -> Int16 -> Int16 -> Int16
+  -> Word8 -> Word8 -> Word8 -> Word8
+  -> IO CInt
+
+foreign import ccall unsafe
+  "aacircleRGBA"
+  c_aacircleRGBA
   :: SDL.Renderer
   -> Int16 -> Int16 -> Int16
   -> Word8 -> Word8 -> Word8 -> Word8
