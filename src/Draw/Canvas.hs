@@ -8,6 +8,7 @@ module Draw.Canvas
 , getContext
 , clear
 , drawRect
+, drawCircle
 ) where
 
 import Draw.Util
@@ -53,3 +54,11 @@ foreign import javascript unsafe
 
 drawRect :: Posn -> Dims -> RGBA -> Context -> IO ()
 drawRect (x, y) (w, h) (r, g, b, a) = js_drawRect x y w h r g b a
+
+foreign import javascript unsafe
+  "js_drawCircle"
+  js_drawCircle
+  :: Int -> Int -> Int -> Int -> Int -> Int -> Int -> Context -> IO ()
+
+drawCircle :: Posn -> Int -> RGBA -> Context -> IO ()
+drawCircle (x, y) rad (r, g, b, a) = js_drawCircle x y rad r g b a

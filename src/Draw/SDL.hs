@@ -8,6 +8,7 @@ module Draw.SDL
 , getContext
 , clear
 , drawRect
+, drawCircle
 ) where
 
 import Draw.Util
@@ -65,6 +66,11 @@ drawRect (x, y) (w, h) (r, g, b, a) rend = do
     SDL.renderFillRect rend prect
   SDL.renderPresent rend
 
+drawCircle :: Posn -> Int -> RGBA -> Context -> IO ()
+drawCircle (x, y) rad (r, g, b, a) rend = do
+  0 <- c_filledCircleRGBA rend (fi x) (fi y) (fi rad) (fi r) (fi g) (fi b) (fi a)
+  SDL.renderPresent rend
+
 -- SDL utils
 
 fi :: (Integral a, Num b) => a -> b
@@ -86,3 +92,11 @@ pollEvent = alloca $ \pevt -> do
   if e == 1
     then fmap Just $ peek pevt
     else return Nothing
+
+foreign import ccall unsafe
+  "filledCircleRGBA"
+  c_filledCircleRGBA
+  :: SDL.Renderer
+  -> Int16 -> Int16 -> Int16
+  -> Word8 -> Word8 -> Word8 -> Word8
+  -> IO CInt
