@@ -30,6 +30,6 @@ executable sdl-canvas
 
   if !impl(ghcjs)
     extra-libraries:
-      sdl2_gfx
+      SDL2_gfx
     includes:
       SDL2_gfxPrimitives.h
