@@ -19,5 +19,10 @@ executable sdl-canvas
   if !impl(ghcjs)
     build-depends:
       sdl2 == 1.1.1
+  if impl(ghcjs)
+    build-depends:
+      ghcjs-base == 0.1.0.0
   hs-source-dirs:       src
   default-language:     Haskell2010
+  js-sources:           js/canvas.js
+  ghc-options:          -Wall
