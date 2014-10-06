@@ -1,0 +1,4 @@
+#!/bin/sh
+cabal clean
+cabal configure --ghc && cabal build
+cabal configure --ghcjs && cabal build

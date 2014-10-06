@@ -26,8 +26,8 @@ initialize = do
 
 type Canvas = SDL.Window
 
-newCanvas :: Int -> Int -> IO Canvas
-newCanvas w h = nullError $ SDL.createWindow
+newCanvas :: Dims -> IO Canvas
+newCanvas (w, h) = nullError $ SDL.createWindow
   nullPtr
   SDL.windowPosUndefined
   SDL.windowPosUndefined

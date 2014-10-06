@@ -23,7 +23,10 @@ type Canvas = JSRef Canvas_
 
 foreign import javascript unsafe
   "js_newCanvas"
-  newCanvas :: Int -> Int -> IO Canvas
+  js_newCanvas :: Int -> Int -> IO Canvas
+
+newCanvas :: Dims -> IO Canvas
+newCanvas (w, h) = js_newCanvas w h
 
 foreign import javascript unsafe
   "$1.parentNode.removeChild($1);"

@@ -1,4 +1,2 @@
 #!/bin/sh
-cabal configure --ghcjs
-cabal build
-open dist/build/sdl-canvas/sdl-canvas.jsexe/index.html
+cabal configure --ghcjs && cabal build && open dist/build/sdl-canvas/sdl-canvas.jsexe/index.html
