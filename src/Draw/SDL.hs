@@ -1,5 +1,7 @@
 module Draw.SDL where
 
+import Draw.Util
+
 import qualified Graphics.UI.SDL as SDL
 import Data.Bits
 import Foreign
@@ -45,17 +47,18 @@ clear ctx = do
   0 <- SDL.renderClear ctx
   SDL.renderPresent ctx
 
-blackRect :: Int -> Int -> Int -> Int -> Context -> IO ()
-blackRect x y w h ctx = do
-  0 <- SDL.setRenderDrawColor ctx 0 0 0 255
-  renderFillRect ctx $ SDL.Rect
-    (fromIntegral x)
-    (fromIntegral y)
-    (fromIntegral w)
-    (fromIntegral h)
-  SDL.renderPresent ctx
+drawRect :: Posn -> Dims -> RGBA -> Context -> IO ()
+drawRect (x, y) (w, h) (r, g, b, a) rend = do
+  0 <- SDL.setRenderDrawColor rend (fi r) (fi g) (fi b) (fi a)
+  0 <- alloca $ \prect -> do
+    poke prect $ SDL.Rect (fi x) (fi y) (fi w) (fi h)
+    SDL.renderFillRect rend prect
+  SDL.renderPresent rend
 
 -- SDL utils
+
+fi :: (Integral a, Num b) => a -> b
+fi = fromIntegral
 
 nullError :: IO (Ptr a) -> IO (Ptr a)
 nullError act = do
@@ -73,9 +76,3 @@ pollEvent = alloca $ \pevt -> do
   if e == 1
     then fmap Just $ peek pevt
     else return Nothing
-
-renderFillRect :: SDL.Renderer -> SDL.Rect -> IO ()
-renderFillRect rend rect = alloca $ \prect -> do
-  poke prect rect
-  0 <- SDL.renderFillRect rend prect
-  return ()

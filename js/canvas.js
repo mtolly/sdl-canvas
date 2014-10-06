@@ -6,7 +6,7 @@ function js_newCanvas(width, height) {
   return c;
 }
 
-function js_blackRect(x, y, w, h, ctx) {
-  ctx.fillStyle = "black";
+function js_drawRect(x, y, w, h, r, g, b, a, ctx) {
+  ctx.fillStyle = 'rgba(' + r + ', ' + g + ', ' + b + ',' + a + ')';
   ctx.fillRect(x, y, w, h);
 }

@@ -12,6 +12,7 @@ executable sdl-canvas
     Draw
     Draw.SDL
     Draw.Canvas
+    Draw.Util
   if impl(ghcjs)
     cpp-options:        -DCANVAS
   build-depends:
