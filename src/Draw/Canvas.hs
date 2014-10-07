@@ -9,12 +9,13 @@ module Draw.Canvas
 , clear
 , drawRect
 , drawCircle
+, drawPolygon
 ) where
 
 import Draw.Util
 
 import GHCJS.Types
--- import GHCJS.Foreign
+import GHCJS.Marshal
 
 initialize :: IO ()
 initialize = return () -- wait for document.ready?
@@ -62,3 +63,13 @@ foreign import javascript unsafe
 
 drawCircle :: Posn -> Int -> RGBA -> Context -> IO ()
 drawCircle (x, y) rad (r, g, b, a) = js_drawCircle x y rad r g b a
+
+foreign import javascript unsafe
+  "js_drawPolygon"
+  js_drawPolygon
+  :: JSRef [[Int]] -> Int -> Int -> Int -> Int -> Context -> IO ()
+
+drawPolygon :: [Posn] -> RGBA -> Context -> IO ()
+drawPolygon pns (r, g, b, a) ctx = do
+  pns' <- toJSRef [ [x, y] | (x, y) <- pns ]
+  js_drawPolygon pns' r g b a ctx

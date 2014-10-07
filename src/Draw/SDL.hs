@@ -9,6 +9,7 @@ module Draw.SDL
 , clear
 , drawRect
 , drawCircle
+, drawPolygon
 ) where
 
 import Draw.Util
@@ -17,7 +18,7 @@ import qualified Graphics.UI.SDL as SDL
 import Data.Bits
 import Foreign
 import Foreign.C
-import Control.Monad (forM_, unless)
+import Control.Monad (unless)
 import Control.Concurrent (threadDelay)
 
 initialize :: IO ()
@@ -67,8 +68,17 @@ drawRect (x, y) (w, h) (r, g, b, a) rend = do
 
 drawCircle :: Posn -> Int -> RGBA -> Context -> IO ()
 drawCircle (x, y) rad (r, g, b, a) rend = do
-  forM_ [c_filledCircleRGBA, c_aacircleRGBA] $ \f ->
-    zero $ f rend (fi x) (fi y) (fi rad) (fi r) (fi g) (fi b) (fi a)
+  zero $
+    c_filledCircleRGBA rend (fi x) (fi y) (fi rad) (fi r) (fi g) (fi b) (fi a)
+  SDL.renderPresent rend
+
+drawPolygon :: [Posn] -> RGBA -> Context -> IO ()
+drawPolygon pns (r, g, b, a) rend = do
+  let vx = map (fi . fst) pns
+      vy = map (fi . snd) pns
+  zero $ withArrayLen vx $ \len pvx ->
+    withArray vy $ \pvy ->
+      c_filledPolygonRGBA rend pvx pvy (fi len) (fi r) (fi g) (fi b) (fi a)
   SDL.renderPresent rend
 
 -- SDL utils
@@ -104,9 +114,9 @@ foreign import ccall unsafe
   -> IO CInt
 
 foreign import ccall unsafe
-  "aacircleRGBA"
-  c_aacircleRGBA
+  "filledPolygonRGBA"
+  c_filledPolygonRGBA
   :: SDL.Renderer
-  -> Int16 -> Int16 -> Int16
+  -> Ptr Int16 -> Ptr Int16 -> CInt
   -> Word8 -> Word8 -> Word8 -> Word8
   -> IO CInt
