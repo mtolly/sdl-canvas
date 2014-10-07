@@ -17,24 +17,23 @@ import qualified Graphics.UI.SDL as SDL
 import Data.Bits
 import Foreign
 import Foreign.C
-import Control.Monad (forM_)
+import Control.Monad (forM_, unless)
 import Control.Concurrent (threadDelay)
 
 initialize :: IO ()
-initialize = do
-  0 <- SDL.init $ SDL.initFlagTimer .|. SDL.initFlagVideo
-  return ()
+initialize = zero $ SDL.init $ SDL.initFlagTimer .|. SDL.initFlagVideo
 
 type Canvas = SDL.Window
 
 newCanvas :: Dims -> IO Canvas
-newCanvas (w, h) = nullError $ SDL.createWindow
-  nullPtr
-  SDL.windowPosUndefined
-  SDL.windowPosUndefined
-  (fromIntegral w)
-  (fromIntegral h)
-  0
+newCanvas (w, h) = withCString "" $ \str ->
+  notNull $ SDL.createWindow
+    str
+    SDL.windowPosUndefined
+    SDL.windowPosUndefined
+    (fromIntegral w)
+    (fromIntegral h)
+    0
 
 deleteCanvas :: Canvas -> IO ()
 deleteCanvas = SDL.destroyWindow
@@ -49,28 +48,27 @@ finish = do
 type Context = SDL.Renderer
 
 getContext :: Canvas -> IO Context
-getContext window = nullError $
+getContext window = notNull $
   SDL.createRenderer window (-1) SDL.rendererFlagAccelerated
 
 clear :: Context -> IO ()
-clear ctx = do
-  0 <- SDL.setRenderDrawColor ctx 255 255 255 255
-  0 <- SDL.renderClear ctx
-  SDL.renderPresent ctx
+clear rend = do
+  zero $ SDL.setRenderDrawColor rend 255 255 255 255
+  zero $ SDL.renderClear rend
+  SDL.renderPresent rend
 
 drawRect :: Posn -> Dims -> RGBA -> Context -> IO ()
 drawRect (x, y) (w, h) (r, g, b, a) rend = do
-  0 <- SDL.setRenderDrawColor rend (fi r) (fi g) (fi b) (fi a)
-  0 <- alloca $ \prect -> do
+  zero $ SDL.setRenderDrawColor rend (fi r) (fi g) (fi b) (fi a)
+  alloca $ \prect -> do
     poke prect $ SDL.Rect (fi x) (fi y) (fi w) (fi h)
-    SDL.renderFillRect rend prect
+    zero $ SDL.renderFillRect rend prect
   SDL.renderPresent rend
 
 drawCircle :: Posn -> Int -> RGBA -> Context -> IO ()
 drawCircle (x, y) rad (r, g, b, a) rend = do
-  forM_ [c_filledCircleRGBA, c_aacircleRGBA] $ \f -> do
-    0 <- f rend (fi x) (fi y) (fi rad) (fi r) (fi g) (fi b) (fi a)
-    return ()
+  forM_ [c_filledCircleRGBA, c_aacircleRGBA] $ \f ->
+    zero $ f rend (fi x) (fi y) (fi rad) (fi r) (fi g) (fi b) (fi a)
   SDL.renderPresent rend
 
 -- SDL utils
@@ -78,15 +76,17 @@ drawCircle (x, y) rad (r, g, b, a) rend = do
 fi :: (Integral a, Num b) => a -> b
 fi = fromIntegral
 
-nullError :: IO (Ptr a) -> IO (Ptr a)
-nullError act = do
+notNull :: IO (Ptr a) -> IO (Ptr a)
+notNull act = do
   p <- act
   if p == nullPtr
-    then do
-      err <- SDL.getError
-      str <- peekCString err
-      error str
+    then SDL.getError >>= peekCString >>= error
     else return p
+
+zero :: (Eq a, Num a) => IO a -> IO ()
+zero act = do
+  n <- act
+  unless (n == 0) $ SDL.getError >>= peekCString >>= error
 
 pollEvent :: IO (Maybe SDL.Event)
 pollEvent = alloca $ \pevt -> do
