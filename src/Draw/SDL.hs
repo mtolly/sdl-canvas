@@ -43,7 +43,7 @@ finish :: IO ()
 finish = do
   e <- pollEvent
   case e of
-    Just (SDL.QuitEvent {}) -> return ()
+    Just (SDL.QuitEvent {}) -> SDL.quit
     _ -> threadDelay 1000 >> finish
 
 type Context = SDL.Renderer
