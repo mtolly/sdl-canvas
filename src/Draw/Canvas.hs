@@ -67,9 +67,9 @@ drawCircle (x, y) rad (r, g, b, a) = js_drawCircle x y rad r g b a
 foreign import javascript unsafe
   "js_drawPolygon"
   js_drawPolygon
-  :: JSRef [[Int]] -> Int -> Int -> Int -> Int -> Context -> IO ()
+  :: JSRef [Posn] -> Int -> Int -> Int -> Int -> Context -> IO ()
 
 drawPolygon :: [Posn] -> RGBA -> Context -> IO ()
 drawPolygon pns (r, g, b, a) ctx = do
-  pns' <- toJSRef [ [x, y] | (x, y) <- pns ]
+  pns' <- toJSRef pns
   js_drawPolygon pns' r g b a ctx
